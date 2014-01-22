@@ -18,18 +18,23 @@
 
 (defn p1
   [tree]
-  (loop [queue [tree "\n"]]
+  (loop [queue [tree]]
     (when (seq queue)
-      (let [sub-tree (first queue)]
-        (if (coll? sub-tree)
-          (let [[root & children] (first queue)]
-            (print root " ")
-            (recur (reduce #(conj %1 %2) 
-                           (vec (rest queue))
-                           children)))
-          (do (print sub-tree " ")
-              (recur (rest queue))))
-        ))))
+      (print "\n")
+      (recur 
+        (reduce (fn [next-queue sub-tree] 
+                  (if (coll? sub-tree)
+                    (let [[root & children] sub-tree]
+                      (print root " ")
+                      (reduce #(conj %1 %2) 
+                              next-queue
+                              children))
+                    (do (print sub-tree " ")
+                        next-queue)))
+                [] ; next-level queue
+                queue))))
+  (print "\n")
+  "Finished")
 
 ;; remove "a" before
 ; (p0 ((b c) (d e) f) nil)
