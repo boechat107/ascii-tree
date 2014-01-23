@@ -1,21 +1,5 @@
 (ns ascii-tree.core)
 
-(defn p0
-  [roots children]
-  ;(redl.core/break)
-  (if (and (empty? roots) (empty? children))
-    (println "Finished")
-    (if (seq roots)
-      (let [[root & more] roots]
-        (if (list? root)
-          (do (print (first root) " ")
-              (p0 more (cons (rest root) children)))
-          (do (print root " ")
-              (p0 more children))))
-      (do (print "\n")
-          (p0 (reverse children) nil))
-      )))
-
 (defn print-tree
   "Prints a list/sequence/collection as a tree. The first element is always a root,
   the branches or leaves are the rest of the elements."
