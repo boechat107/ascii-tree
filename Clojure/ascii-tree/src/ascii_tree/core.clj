@@ -4,19 +4,19 @@
   [node]
   (string? node))
 
-(defn length
+(defn width
   [elem]
   (count elem))
 
-(defn calc-length
-  "Calculates the length of a tree by calculating the length of the leaves first."
+(defn calc-width
+  "Calculates the width of a tree by calculating the width of the leaves first."
   [node]
   (if (leaf? node)
-    (list node (length node))
+    (list node (width node))
     (let [[root & branches] node
-          mod-branches (map calc-length branches)
+          mod-branches (map calc-width branches)
           branches-len (reduce #(+ %1 (second %2)) 0 mod-branches)
-          root-len (length root)]
+          root-len (width root)]
       (list* root (max root-len branches-len) mod-branches))))
 
 (defn print-tree
