@@ -35,8 +35,15 @@
 
 (defn make-empty-node
   [w]
-  (let [elem (space-str w)]
-    (list elem (width elem))))
+  (let [elem (space-str (dec w))]
+    (list elem w)))
+
+(defn print-root 
+  [root-elem w]
+  (let [n-space (/ (- w (width root-elem)) 2)]
+    (if (zero? n-space)
+      (print root-elem "")
+      (print (str (space-str (dec n-space)) root-elem (space-str (inc n-space)))))))
 
 (defn print-tree
   "Prints a list/sequence/collection as a tree. The first element is always a root,
@@ -51,12 +58,12 @@
                     ;; Checks if the element has children or not.
                     (if (leaf? node)
                       (let [[leaf w] node]
-                        (print leaf " ")
+                        (print leaf "")
                         (if (== level max-level)
                           next-queue
                           (conj next-queue (make-empty-node w))))
                       (let [[root w & branches] node]
-                        (print root " ") ; prints the root.
+                        (print-root root w)
                         (reduce #(conj %1 %2) ; enqueue its children for the next level.
                                 next-queue
                                 branches))))
