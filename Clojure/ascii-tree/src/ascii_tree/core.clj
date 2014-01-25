@@ -17,17 +17,6 @@
     (let [[root & branches] node]
       (inc (reduce max (map height branches))))))
 
-(defn calc-width
-  "Calculates the width of a tree by calculating the width of the leaves first."
-  [node]
-  (if (leaf? node)
-    (list node (width node))
-    (let [[root & branches] node
-          mod-branches (map calc-width branches)
-          branches-len (reduce #(+ %1 (second %2)) 0 mod-branches)
-          root-len (width root)]
-      (list* root (max root-len branches-len) mod-branches))))
-
 (defn space-str
   "Returns a string of n spaces."
   [n]
@@ -37,6 +26,22 @@
   [w]
   (let [elem (space-str (dec w))]
     (list elem w)))
+
+(defn calc-width
+  "Calculates the width of a tree by calculating the width of the leaves first."
+  [node]
+  (if (leaf? node)
+    (list node (width node))
+    (let [[root & branches] node
+          mod-branches (map calc-width branches)
+          branches-len (reduce #(+ %1 (second %2)) 0 mod-branches)
+          root-len (width root)]
+      (if (< root-len branches-len)
+        (list* root branches-len mod-branches)
+        (list* root 
+               root-len
+               (make-empty-node (- root-len branches-len)) 
+               mod-branches)))))
 
 (defn print-root 
   [root-elem w]
