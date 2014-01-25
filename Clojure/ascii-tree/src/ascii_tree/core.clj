@@ -2,11 +2,20 @@
 
 (defn leaf?
   [node]
-  (string? node))
+  (or (string? node) (and (== 2 (count node))
+                          (integer? (second node)))))
 
 (defn width
   [elem]
-  (count elem))
+  (inc (count elem)))
+
+(defn height
+  "Returns the height of a given tree."
+  [node]
+  (if (leaf? node)
+    1
+    (let [[root & branches] node]
+      (inc (reduce max (map height branches))))))
 
 (defn calc-width
   "Calculates the width of a tree by calculating the width of the leaves first."
@@ -19,26 +28,41 @@
           root-len (width root)]
       (list* root (max root-len branches-len) mod-branches))))
 
+(defn space-str
+  "Returns a string of n spaces."
+  [n]
+  (apply str (repeat n \space)))
+
+(defn make-empty-node
+  [w]
+  (let [elem (space-str w)]
+    (list elem (width elem))))
+
 (defn print-tree
   "Prints a list/sequence/collection as a tree. The first element is always a root,
   the branches or leaves are the rest of the elements."
   [tree]
-  (loop [queue [tree]]
-    (when (seq queue)
-      (print "\n") ; to split levels.
-      (recur 
-        (reduce (fn [next-queue sub-tree] 
-                  ;; Checks if the element has children or not.
-                  (if (coll? sub-tree)
-                    (let [[root & children] sub-tree]
-                      (print root " ") ; prints the root.
-                      (reduce #(conj %1 %2) ; enqueue its children for the next level.
-                              next-queue
-                              children))
-                    (do (print sub-tree " ")
-                        next-queue)))
-                [] ; next-level queue
-                queue))))
+  (let [max-level (dec (height tree))]
+    (loop [queue [(calc-width tree)], level 0]
+      (when (seq queue)
+        (print "\n") ; to split levels.
+        (recur 
+          (reduce (fn [next-queue node] 
+                    ;; Checks if the element has children or not.
+                    (if (leaf? node)
+                      (let [[leaf w] node]
+                        (print leaf " ")
+                        (if (== level max-level)
+                          next-queue
+                          (conj next-queue (make-empty-node w))))
+                      (let [[root w & branches] node]
+                        (print root " ") ; prints the root.
+                        (reduce #(conj %1 %2) ; enqueue its children for the next level.
+                                next-queue
+                                branches))))
+                  [] ; next-level queue
+                  queue)
+          (inc level)))))
   (print "\n") ; just to separate the tree from the returned value.
   "Finished")
 
