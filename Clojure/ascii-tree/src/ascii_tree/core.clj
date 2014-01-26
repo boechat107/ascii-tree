@@ -13,14 +13,14 @@
     (let [[root & branches] node]
       (inc (reduce max (map height branches))))))
 
-(defn space-str
+(defn repeat-char
   "Returns a string of n spaces."
-  [n]
-  (apply str (repeat (int n) \space)))
+  [n c]
+  (apply str (repeat (int n) c)))
 
 (defn make-empty-node
   [elem-w extra-space]
-  (list (space-str elem-w) (+ elem-w extra-space)))
+  (list (repeat-char elem-w \space) (+ elem-w extra-space)))
 
 (defn calc-width
   "Calculates the width of a tree by calculating the width of the leaves first."
@@ -43,51 +43,33 @@
     (walker tree)))
 
 (defn fill-str
-  [elem width]
-  (let [space (space-str (/ (- width (count elem)) 2))
-        output (str space elem space)]
+  [elem width c]
+  (let [to-fill (/ (- width (count elem)) 2)
+        fill-c (if (< to-fill 2) "" (repeat-char (dec to-fill) c))
+        fill-spc (if (< to-fill 1) "" \space)
+        output (format "%s%s%s%s%s" fill-spc fill-c elem fill-c fill-spc)]
     (if (< (count output) width)
-      (str " " output)
+      (str \space output)
       output)))
 
-(defn print-root! 
-  [root extra-space]
-  (let [[elem w & branches] root 
-        ]
-    ))
-
-(defn print-leaf!
-  [leaf]
-  (let [[elem w] leaf]
-    (print (fill-str elem w))))
+(defn print-elem!
+  [elem w fill-ch]
+  (print (fill-str elem w fill-ch)))
 
 (defn print-lines!
   [queue extra-space]
-  (letfn [(printer [brs line-char]
-            (doseq [[e w] brs]
-              (let [space (space-str (dec (/ w 2)))]
-                (print (str space line-char space)))))]
-    (doseq [node queue]
-      (if (leaf? node)
-        (print-leaf! [(space-str (count (first node))) (second node)])
-        (let [[root w & branches] node
-              middle-root (/ w 2)
-              n-branches (count branches)
-              [left right] (split-at (/ n-branches 2) branches)
-              [left center] (if (odd? n-branches) 
-                              [(butlast left) [(last left)]]
-                              [left nil])]
-          (reduce (fn [acc [_ bw]]
-                    (if (< (/ (+ acc bw) 2) middle-root)
-                      (print-leaf! ["/" bw])
-                      (print-leaf! ["\\" bw]))
-                    (+ acc bw))
-                  0
-                  branches)
-          ;(printer left "/")
-          ;(when (seq center) (printer center "|"))
-          ;(printer right "\\")
-          )))))
+  (doseq [node queue]
+    (if (leaf? node)
+      (let [[elem w] node] (print-elem! (repeat-char w \space) w \space))
+      (let [[root w & branches] node
+            middle-root (/ w 2)]
+        (reduce (fn [acc [_ bw]]
+                  (if (< (/ (+ acc bw) 2) middle-root)
+                    (print-elem! "/" bw \space)
+                    (print-elem! "\\" bw \space))
+                  (+ acc bw))
+                0
+                branches)))))
 
 (defn print-tree
   "Prints a list/sequence/collection as a tree. The first element is always a root,
@@ -101,13 +83,13 @@
                                     ;; Checks if the element has children or not.
                                     (if (leaf? node)
                                       (let [[leaf w] node]
-                                        (print-leaf! node)
+                                        (print-elem! leaf w \space)
                                         (if (== level max-level)
                                           next-queue
                                           (conj next-queue 
                                                 (make-empty-node (count leaf) space))))
                                       (let [[root w & branches] node]
-                                        (print-leaf! node)
+                                        (print-elem! root w "_")
                                         ;; Enqueue its children for the next level.
                                         (reduce #(conj %1 %2) 
                                                 next-queue
@@ -120,6 +102,3 @@
          (recur next-queue (inc level))))))
    (print "\n") ; just to separate the tree from the returned value.
    "Finished"))
-
-;; remove "a" before
-; (p0 ((b c) (d e) f) nil)
