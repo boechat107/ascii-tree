@@ -6,5 +6,6 @@
   :author "Your Name <your.name@example.com>"
   :license "Specify license here"
   :components ((:file "package")
-               (:file "ascii-tree")))
+               (:file "ascii-tree")
+               (:file "tests")))
 
