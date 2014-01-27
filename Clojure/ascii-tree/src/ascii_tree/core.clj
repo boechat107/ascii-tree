@@ -89,7 +89,7 @@
   "Prints a list/sequence/collection as a tree. The first element is always a root,
   the branches or leaves are the rest of the elements.
   The space between the elements can be specified."
-  ([tree] (print-tree tree 2))
+  ([tree] (print-tree! tree 2))
   ([tree space]
    (let [max-level (dec (height tree))]
      (loop [queue [(add-width-info tree space)], level 0]
