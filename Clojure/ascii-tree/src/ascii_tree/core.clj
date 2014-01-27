@@ -71,7 +71,7 @@
 (defn print-lines!
   "Given the queue of nodes of a specific level, prints the lines to connect roots
   and branches."
-  [queue extra-space]
+  [queue]
   (doseq [node queue]
     (if (leaf? node)
       (let [[elem w] node] (print-elem! (repeat-char w \space) w \space))
@@ -115,7 +115,7 @@
                                   [] ; next-level queue
                                   queue)]
          (newline) ; to split levels.
-         (print-lines! queue space)
+         (print-lines! queue)
          (newline) ; to split levels.
          (recur next-queue (inc level))))))
     (newline) ; just to separate the tree from the returned value.
