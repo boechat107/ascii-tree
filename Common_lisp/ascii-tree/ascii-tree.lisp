@@ -40,3 +40,28 @@
                    elem 
                    (make-c-str :r)
                    (if (> n-tofill 1) " " "")))))
+
+(defun print-elem! (elem w c)
+  (print (fill-str elem w c)))
+
+(defun print-lines! (queue spc)
+  (map-queue (lambda (node)
+               (let ((w (width node spc)))
+                 (if (leaf? node)
+                   (print (fill-str " " w #\space)) ; prints just spaces.
+                   (let ((middle-root (/ w 2)))
+                     (reduce (lambda (acc branch-node)
+                               (let ((bw (width branch-node spc)))
+                                 (if (< (/ (+ acc bw) 2) middle-root)
+                                   (print-elem! "/" bw #\space)
+                                   (print-elem! "\\" bw #\space))
+                                 (+ acc bw)))
+                             (rest node) ; branches
+                             :initial-value 0)))))
+             queue))
+
+;(defun print-tree! (tree &optional (spc 2))
+;  (let ((max-level (1- (height tree))))
+;    
+;    )
+;  )
