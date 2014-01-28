@@ -16,7 +16,8 @@
   (labels ((walker (node)
              (if (leaf? node)
                (+ extra-space (length node))
-               (reduce #'+ (map 'list #'walker (cdr node))))))
+               (max (reduce #'+ (map 'list #'walker (rest node)))
+                    (+ extra-space (length (first node)))))))
     (walker tree)))
 
 (defun fill-str (elem width c)
@@ -41,6 +42,32 @@
                    (make-c-str :r)
                    (if (> n-tofill 1) " " "")))))
 
+(defun uniform-width (tree spc)
+  (labels ((root-branches-diff (node)
+             (let* ((root-len (+ spc (length (first node))))
+                    (bs-len (reduce (lambda (acc b)
+                                      (+ acc (width b spc)))
+                                    (rest node)
+                                    :initial-value 0)))
+               (- root-len bs-len)))
+           (walker (node diff)
+             (cond 
+               ((and (leaf? node) (plusp diff))
+                (fill-str node (+ diff (length node)) #\space))
+               ((leaf? node) node)
+               ;; If the root's width is greater than its branches', its first
+               ;; branch's string is expanded with spaces to have a uniform 
+               ;; subtree spacing.
+               (t (let* ((this-diff (root-branches-diff node))
+                         (new-diff (if (> diff this-diff) diff (+ diff this-diff)))
+                         (branches (rest node)))
+                    (cons 
+                      (first node)
+                      (cons (walker (first branches) new-diff) 
+                            (map 'list (lambda (b) (walker b 0)) (rest branches)))))))))
+    (walker tree 0)
+    ))
+
 (defun print-elem! (elem w c)
   (format t "~a" (fill-str elem w c)))
 
@@ -63,7 +90,7 @@
 (defun print-tree! (tree &optional (spc 2))
   (let ((max-level (1- (height tree)))
         (queue (make-queue :simple-queue)))
-    (qpush queue tree)
+    (qpush queue (uniform-width tree spc))
     (labels 
       ((level-loop (cur-q level)
          (when (plusp (qsize cur-q))
