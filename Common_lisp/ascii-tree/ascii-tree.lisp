@@ -13,6 +13,7 @@
     (1+ (reduce #'max (map 'list #'height (rest tree))))))
 
 (defun width (tree extra-space)
+  "Returns the width of a tree, considering a extra space between leaves."
   (labels ((walker (node)
              (if (leaf? node)
                (+ extra-space (length node))
@@ -43,7 +44,14 @@
                    (if (> n-tofill 1) " " "")))))
 
 (defun uniform-width (tree spc)
+  "Returns a new tree (a lisp list) where some leaves can be possible expanded by
+   spaces to fix their subtrees.
+   The algorithm checks if there is some width inconsistency (root wider than the sum
+   of its branches) and fix the problem the first possible leaf of the first possible 
+   branch."
   (labels ((root-branches-diff (node)
+             ;; Calculates the difference between the sum of branches' width and the
+             ;; root's width.
              (let* ((root-len (+ spc (length (first node))))
                     (bs-len (reduce (lambda (acc b)
                                       (+ acc (width b spc)))
@@ -65,8 +73,7 @@
                       (first node)
                       (cons (walker (first branches) new-diff) 
                             (map 'list (lambda (b) (walker b 0)) (rest branches)))))))))
-    (walker tree 0)
-    ))
+    (walker tree 0)))
 
 (defun print-elem! (elem w c)
   (format t "~a" (fill-str elem w c)))
@@ -77,6 +84,9 @@
                  (if (leaf? node)
                    (print-elem! " " w #\space) ; prints just spaces.
                    (let ((middle-root (/ w 2)))
+                     ;; Uses the middle point of the space used by the root to choose
+                     ;; between / our \.
+                     ;; The link is printed on the same space of a branch.
                      (reduce (lambda (acc branch-node)
                                (let ((bw (width branch-node spc)))
                                  (if (< (/ (+ acc bw) 2) middle-root)
