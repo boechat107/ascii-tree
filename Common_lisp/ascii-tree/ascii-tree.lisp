@@ -42,13 +42,13 @@
                    (if (> n-tofill 1) " " "")))))
 
 (defun print-elem! (elem w c)
-  (print (fill-str elem w c)))
+  (format t "~a" (fill-str elem w c)))
 
 (defun print-lines! (queue spc)
   (map-queue (lambda (node)
                (let ((w (width node spc)))
                  (if (leaf? node)
-                   (print (fill-str " " w #\space)) ; prints just spaces.
+                   (print-elem! " " w #\space) ; prints just spaces.
                    (let ((middle-root (/ w 2)))
                      (reduce (lambda (acc branch-node)
                                (let ((bw (width branch-node spc)))
@@ -60,8 +60,33 @@
                              :initial-value 0)))))
              queue))
 
-;(defun print-tree! (tree &optional (spc 2))
-;  (let ((max-level (1- (height tree))))
-;    
-;    )
-;  )
+(defun print-tree! (tree &optional (spc 2))
+  (let ((max-level (1- (height tree)))
+        (queue (make-queue :simple-queue)))
+    (qpush queue tree)
+    (labels 
+      ((level-loop (cur-q level)
+         (when (plusp (qsize cur-q))
+           (let ((next-q (make-queue :simple-queue)))
+             (map-queue (lambda (node)
+                          (let ((w (width node spc)))
+                            (if (leaf? node)
+                              (progn 
+                                (print-elem! node w #\space)
+                                ;; When the leaf is not at the last level of the
+                                ;; tree, a fake node is inserted as its branch just 
+                                ;; fill the empty space below.
+                                (when (not (= level max-level))
+                                  (qpush next-q 
+                                         (fill-str " " (length node) #\space))))
+                              (progn 
+                                (print-elem! (first node) w #\_)
+                                ;; Enqueue its branches for the next level.
+                                (map nil (lambda (branch) (qpush next-q branch))
+                                     (rest node))))))
+                        cur-q)
+             (format t "~%") ; to split levels
+             (print-lines! cur-q spc)
+             (format t "~%") ; to split levels 
+             (level-loop next-q (1+ level))))))
+      (level-loop queue 0))))
