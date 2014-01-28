@@ -1,4 +1,6 @@
-# print-tree
+# ascii-tree
+
+Prints a Lisp list as a pretty tree.
 
 ## Clojure tests
 
